@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:logging/logging.dart';
-import 'package:my_tictactoe/src/game_internals/board_setting.dart';
 
+import '../ai/ai_opponent.dart';
+import 'board_setting.dart';
 import 'tile.dart';
 
 class BoardState extends ChangeNotifier {
   static final Logger _log = Logger('BoardState');
 
   final BoardSetting setting;
+
+  final AiOpponent aiOpponent;
 
   final Set<int> _xTaken;
 
@@ -25,27 +28,21 @@ class BoardState extends ChangeNotifier {
 
   List<Tile>? _winningLine;
 
-  BoardState.clean(
-    BoardSetting setting,
-  ) : this._(setting, {}, {}, null, null);
+  BoardState.clean(BoardSetting setting, AiOpponent aiOpponent)
+      : this._(setting, {}, {}, aiOpponent, null, null);
 
   @visibleForTesting
   BoardState.withExistingState({
     required BoardSetting setting,
+    required AiOpponent aiOpponent,
     required Set<int> takenByX,
     required Set<int> takenByO,
     Tile? latestX,
     Tile? latestO,
-  }) : this._(
-          setting,
-          takenByX,
-          takenByO,
-          latestX,
-          latestO,
-        );
+  }) : this._(setting, takenByX, takenByO, aiOpponent, latestX, latestO);
 
-  BoardState._(this.setting, this._xTaken, this._oTaken, this._latestXTile,
-      this._latestOTile);
+  BoardState._(this.setting, this._xTaken, this._oTaken, this.aiOpponent,
+      this._latestXTile, this._latestOTile);
 
   /// This is `true` if the board game is locked for the player.
   bool get isLocked => _isLocked;
@@ -204,7 +201,7 @@ class BoardState extends ChangeNotifier {
       assert(_isLocked);
       assert(
           _hasOpenTiles, 'Somehow, tiles got taken while waiting for AI turn');
-
+      final tile = aiOpponent.chooseNextMove(this);
       _takeTile(tile, setting.aiOpponentSide);
 
       if (_getWinner() == setting.aiOpponentSide) {

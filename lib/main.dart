@@ -7,6 +7,7 @@ import 'package:provider/provider.dart';
 
 import 'src/app_lifecycle/app_lifecycle.dart';
 import 'src/audio/audio_controller.dart';
+import 'src/level_selection/levels.dart';
 import 'src/main_menu/main_menu_screen.dart';
 import 'src/play_session/play_session_screen.dart';
 import 'src/settings/persistence/local_storage_settings_persistence.dart';
@@ -65,6 +66,7 @@ class MyApp extends StatelessWidget {
             pageBuilder: (context, state) {
               return buildTransition<void>(
                 child: PlaySessionScreen(
+                  gameLevels[0],
                   key: const Key('play session'),
                 ),
                 color: context.watch<Palette>().backgroundPlaySession,

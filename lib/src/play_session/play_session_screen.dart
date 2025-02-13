@@ -6,10 +6,11 @@ import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart' hide Level;
 import 'package:provider/provider.dart';
 
+import '../ai/ai_opponent.dart';
 import '../audio/audio_controller.dart';
 import '../audio/sounds.dart';
-import '../game_internals/board_setting.dart';
 import '../game_internals/board_state.dart';
+import '../level_selection/levels.dart';
 import '../settings/custom_name_dialog.dart';
 import '../settings/settings.dart';
 import '../style/confetti.dart';
@@ -19,7 +20,9 @@ import 'game_board.dart';
 import 'hint_snackbar.dart';
 
 class PlaySessionScreen extends StatefulWidget {
-  const PlaySessionScreen({super.key});
+  final GameLevel level;
+
+  const PlaySessionScreen(this.level, {super.key});
 
   @override
   State<PlaySessionScreen> createState() => _PlaySessionScreenState();
@@ -34,9 +37,11 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
 
   final StreamController<void> _resetHint = StreamController.broadcast();
 
-  bool _duringCelebration = false;
+  final bool _duringCelebration = false;
 
   late DateTime _startOfPlay;
+
+  late final AiOpponent opponent;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +53,8 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
         ChangeNotifierProvider(
           create: (context) {
             final state = BoardState.clean(
-              BoardSetting(3, 3, 3),
+              widget.level.setting,
+              opponent,
             );
 
             Future.delayed(const Duration(milliseconds: 500)).then((_) {
@@ -86,9 +92,12 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                         ..onTap = () => showCustomNameDialog(context),
                     ),
                     opponentName: TextSpan(
-                      text: 'asdasdad',
+                      text: opponent.name,
                       style: textStyle,
                       recognizer: TapGestureRecognizer()
+                        // TODO: implement
+                        //       (except maybe not, because in user testing,
+                        //        nobody has ever touched this)
                         ..onTap = () => _log
                             .severe('Tapping opponent name NOT IMPLEMENTED'),
                     ),
@@ -103,7 +112,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
                         },
                         child: Board(
                           key: const Key('main board'),
-                          setting: BoardSetting(3, 3, 3),
+                          setting: widget.level.setting,
                         ),
                       ),
                     ),
@@ -185,6 +194,9 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
   void initState() {
     super.initState();
 
+    opponent = widget.level.aiOpponentBuilder(widget.level.setting);
+    _log.info('$opponent enters the fray');
+
     _startOfPlay = DateTime.now();
   }
 
@@ -193,22 +205,7 @@ class _PlaySessionScreenState extends State<PlaySessionScreen> {
     _resetHint.add(null);
   }
 
-  void _playerWon() async {
-    // Let the player see the game just after winning for a bit.
-    await Future<void>.delayed(_preCelebrationDuration);
-    if (!mounted) return;
-
-    setState(() {
-      _duringCelebration = true;
-    });
-
-    final audioController = context.read<AudioController>();
-    audioController.playSfx(SfxType.congrats);
-
-    /// Give the player some time to see the celebration animation.
-    await Future.delayed(_celebrationDuration);
-    if (!mounted) return;
-  }
+  void _playerWon() async {}
 }
 
 class _RestartButton extends StatefulWidget {

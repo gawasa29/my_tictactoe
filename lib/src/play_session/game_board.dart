@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../game_internals/board_setting.dart';
 import '../game_internals/tile.dart';
 import 'board_tile.dart';
+import 'rough_grid.dart';
 
 class Board extends StatefulWidget {
   final VoidCallback? onPlayerWon;
@@ -23,6 +24,7 @@ class _BoardState extends State<Board> {
       child: Stack(
         fit: StackFit.expand,
         children: [
+          RoughGrid(widget.setting.m, widget.setting.n),
           Column(
             children: [
               for (var y = 0; y < widget.setting.n; y++)
