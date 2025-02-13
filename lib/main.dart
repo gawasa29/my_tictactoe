@@ -8,10 +8,12 @@ import 'package:provider/provider.dart';
 import 'src/app_lifecycle/app_lifecycle.dart';
 import 'src/audio/audio_controller.dart';
 import 'src/main_menu/main_menu_screen.dart';
+import 'src/play_session/play_session_screen.dart';
 import 'src/settings/persistence/local_storage_settings_persistence.dart';
 import 'src/settings/persistence/settings_persistence.dart';
 import 'src/settings/settings.dart';
 import 'src/settings/settings_screen.dart';
+import 'src/style/ink_transition.dart';
 import 'src/style/palette.dart';
 
 void main() async {
@@ -58,6 +60,18 @@ class MyApp extends StatelessWidget {
         builder: (context, state) =>
             const MainMenuScreen(key: Key('main menu')),
         routes: [
+          GoRoute(
+            path: 'session',
+            pageBuilder: (context, state) {
+              return buildTransition<void>(
+                child: PlaySessionScreen(
+                  key: const Key('play session'),
+                ),
+                color: context.watch<Palette>().backgroundPlaySession,
+                flipHorizontally: true,
+              );
+            },
+          ),
           GoRoute(
             path: 'settings',
             builder: (context, state) =>

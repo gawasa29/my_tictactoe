@@ -48,7 +48,7 @@ class MainMenuScreen extends StatelessWidget {
               ms: 800,
               child: ElevatedButton(
                 onPressed: () {
-                  GoRouter.of(context).go('/play');
+                  GoRouter.of(context).go('/session');
                 },
                 style: ElevatedButton.styleFrom(
                   minimumSize: const Size(double.infinity, 60),
